@@ -22,115 +22,115 @@
 
 #### 1.1 Плейбук для сервера на основе Ubuntu 22.04 LTS
 
-    ```bash
-    # ssh nfs-server
-    $ cat setup-nfs-server.yml
-    ---
-    - hosts: localhost
-      become: true
-      gather_facts: yes
+```bash
+# ssh nfs-server
+$ cat setup-nfs-server.yml
+---
+- hosts: all
+  become: true
+  gather_facts: yes
 
-      vars:
-        nfs_exports: [ "/mnt/public *(rw,insecure,nohide,all_squash,anonuid=33,no_subtree_check)" ]
+  vars:
+    nfs_exports: [ "/mnt/public *(rw,insecure,nohide,all_squash,anonuid=33,no_subtree_check)" ]
 
-      roles:
-      - role: ansible-nfs-server
+  roles:
+  - role: ansible-nfs-server
 
-    $ ansible-playbook setup-nfs-server.yml
-    ```
+$ ansible-playbook setup-nfs-server.yml
+```
 ---
 
 ### 2. Плейбук для NFS-клиентов
 
 Написать **Ansible** роль, которая будет конфигурировать клиентскую часть **NFS**: роль должна уметь на стороне клиента установить необходимые пакеты, примонтировать сетевой **nfs**-ресурс с помощью **systemd**-юнита и желательно сделать вариант юнита **automount**.
 
-    Подготовлены два плейбука:
-      - На основе **ansible.posix.mount** - `simple-nfs-posix.mount.yml`
-      - С поддержкой **systemd** и **automount** - `setup-nfs-client.yml`
+Подготовлены 2 плейбука:
+  - На основе **ansible.posix.mount** - `simple-nfs-posix.mount.yml`
+  - С поддержкой **systemd** и **automount** - `setup-nfs-client.yml`
 
 #### 2.1 Плейбук на основе **ansible.posix.mount** для Linux на основе RedHat и Ubuntu
 
-    ```bash
-    # ssh nfs-client
-    $ cat simple-nfs-posix.mount.yml
-    ---
-    - name: Simple NFS posix.mount
-      hosts: localhost
-      become: true
-      gather_facts: yes
+```bash
+# ssh nfs-client
+$ cat simple-nfs-posix.mount.yml
+---
+- name: Simple NFS posix.mount
+  hosts: all
+  become: true
+  gather_facts: yes
 
-      vars:
-        nfs_share: "192.168.56.251:/mnt/public"
-        nfs_mountpoint: "/share"
-        nfs_permissions: '0777'
-        nfs_options: 'rw,sync'
-        owner: root
-        group: root
+  vars:
+    nfs_share: "192.168.56.251:/mnt/public"
+    nfs_mountpoint: "/share"
+    nfs_permissions: '0777'
+    nfs_options: 'rw,sync'
+    owner: root
+    group: root
 
-      tasks:
-        - name: Ensure required utilities present for Redhat-based
-          ansible.builtin.yum:
-            name:
-              - nfs-utils
-              - nfs4-acl-tools
-            state: present
-          when: ansible_os_family == 'RedHat'
+  tasks:
+    - name: Ensure required utilities present for Redhat-based
+      ansible.builtin.yum:
+        name:
+          - nfs-utils
+          - nfs4-acl-tools
+        state: present
+      when: ansible_os_family == 'RedHat'
 
-        - name: Ensure required utilities present for Debian-based
-          ansible.builtin.apt:
-            name:
-              - nfs-common
-              - nfs4-acl-tools
-            state: present
-          when: ansible_os_family == 'Debian'
+    - name: Ensure required utilities present for Debian-based
+      ansible.builtin.apt:
+        name:
+          - nfs-common
+          - nfs4-acl-tools
+        state: present
+      when: ansible_os_family == 'Debian'
 
-        - name: Ensure mountpoint exist
-          ansible.builtin.file:
-            path: "{{ nfs_mountpoint }}"
-            state: directory
-            mode: "{{ nfs_permissions }}"
-            owner: "{{ owner }}"
-            group: "{{ group }}"
+    - name: Ensure mountpoint exist
+      ansible.builtin.file:
+        path: "{{ nfs_mountpoint }}"
+        state: directory
+        mode: "{{ nfs_permissions }}"
+        owner: "{{ owner }}"
+        group: "{{ group }}"
 
-        - name: Mount NFS network share
-          ansible.posix.mount:
-            src: "{{ nfs_share }}"
-            path: "{{ nfs_mountpoint }}"
-            fstype: nfs
-            opts: "{{ nfs_options }}"
-            state: mounted
+    - name: Mount NFS network share
+      ansible.posix.mount:
+        src: "{{ nfs_share }}"
+        path: "{{ nfs_mountpoint }}"
+        fstype: nfs
+        opts: "{{ nfs_options }}"
+        state: mounted
 
-    $ ansible-playbook simple-nfs-posix.mount.yml
-    ```
+$ ansible-playbook simple-nfs-posix.mount.yml
+```
 
 #### 2.2 Плейбук с поддержкой **systemd** и **automount** для Linux на основе Ubuntu
 
-    ```bash
-    # ssh nfs-client
-    $ cat setup-nfs-client.yml
-    ---
-    - hosts: localhost
-      become: true
-      gather_facts: yes
+```bash
+# ssh nfs-client
+$ cat setup-nfs-client.yml
+---
+- hosts: all
+  become: true
+  gather_facts: yes
 
-      vars:
-        mounts:
-          PublicShare:
-            share: 192.168.56.251:/mnt/public
-            mount: /opt/publicshare
-            type: nfs
-            options: auto
-            automount: true
+  vars:
+    mounts:
+      PublicShare:
+        share: 192.168.56.251:/mnt/public
+        mount: /opt/publicshare
+        type: nfs
+        options: auto
+        automount: true
 
-      roles:
-        - role: ansible-nfs-client
+  roles:
+    - role: ansible-nfs-client
 
-    $ ansible-playbook setup-nfs-client.yml
-    ```
+$ ansible-playbook setup-nfs-client.yml
+```
 
 ## Дополнительно
 ### Тестовая среда на основе Virtualbox + Vagrant
-Для целей создания демо-стенда возможно использовать связку **Vagrant** и **VirtualBox** (см. замечание). 
+Для целей создания демо-стенда возможно использовать связку **Vagrant** и **VirtualBox**.
 
 Стенд содержит конфигурацию для 3-х ВМ:
   - Виртуалка для Ansible-контроллера
@@ -140,10 +140,11 @@
     - `host02.ansible.local (host02)`
 
 ```bash
-cd ansible-lab-vagrant\
-vagrant up
-vagrant ssh controller
-```
+$ cd ansible-lab-vagrant\
+$ vagrant up
+$ vagrant ssh controller
 
-**Замечание:**
-В момент написания этого readme еще не была решена проблема авторизации по SSH, в связи с чем плейбуки тестировались лишь локально.
+$ cd ~/ansible-nfs-roles
+$ ansible-playbook -l servers setup-nfs-server.yml
+$ ansible-playbook -l clients setup-nfs-client.yml
+```
