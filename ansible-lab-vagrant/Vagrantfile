@@ -1,5 +1,5 @@
-BOX_IMAGE = "ubuntu/jammy64"
-NODE_COUNT = 2
+BOX_IMAGE = "ubuntu/focal64"
+HOST_COUNT = 2
 
 Vagrant.configure("2") do |config|
   config.vm.box_check_update = "false"
@@ -15,7 +15,7 @@ Vagrant.configure("2") do |config|
     controller.vm.provision "file", source: "key_gen.sh", destination: "/home/vagrant/"
   end
 
-  (1..NODE_COUNT).each do |i|
+  (1..HOST_COUNT).each do |i|
     config.vm.define "host0#{i}" do |hosts|
       hosts.vm.provider "virtualbox" do |vb|
         vb.memory = "1024"
