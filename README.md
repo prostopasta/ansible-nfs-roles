@@ -144,6 +144,7 @@ $ cd ansible-lab-vagrant\
 $ vagrant up
 $ vagrant ssh controller
 
+$ bash ~/key_gen.sh
 $ cd ~/ansible-nfs-roles
 $ ansible-playbook -l servers setup-nfs-server.yml
 $ ansible-playbook -l clients setup-nfs-client.yml
