@@ -1,0 +1,14 @@
+[Unit]
+Description=Mount {{ item.key }}
+After=network-online.target
+Wants=network-online.target
+
+[Mount]
+What={{ item.value.share }}
+Where={{ item.value.mount }}
+Type={{ item.value.type | default ('mounts_type') }}
+Options={{ item.value.options | default ('mounts_options') }}
+TimeoutSec=60
+
+[Install]
+WantedBy=remote-fs.target

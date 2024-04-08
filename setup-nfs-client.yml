@@ -1,0 +1,15 @@
+- hosts: localhost
+  become: true
+  gather_facts: yes
+
+  vars:
+    mounts:
+      PublicShare:
+        share: 192.168.56.251:/mnt/public
+        mount: /opt/publicshare
+        type: nfs
+        options: auto
+        automount: true
+
+  roles:
+    - role: ansible-nfs-client

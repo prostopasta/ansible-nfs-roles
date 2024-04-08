@@ -1,0 +1,20 @@
+galaxy_info:
+  author: Pavel Statsenko
+  description: The ansible role mount file shares as Systemd service with automount support
+  license: license (MIT)
+
+  min_ansible_version: 2.10.8
+  platforms:
+  - name: Ubuntu
+    versions:
+    - jammy
+
+  galaxy_tags:
+  - systemd
+  - mount
+  - nfs
+  - cifs
+  - automount
+  - ubuntu
+
+dependencies: []

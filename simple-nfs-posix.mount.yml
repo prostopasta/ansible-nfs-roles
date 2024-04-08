@@ -1,0 +1,46 @@
+---
+- name: Simple NFS posix.mount
+  hosts: localhost
+  become: true
+  gather_facts: yes
+
+  vars:
+    nfs_share: "192.168.56.251:/mnt/public"
+    nfs_mountpoint: "/share"
+    nfs_permissions: '0777'
+    nfs_options: 'rw,sync'
+    owner: root
+    group: root
+
+  tasks:
+    - name: Ensure required utilities present for Redhat-based
+      ansible.builtin.yum:
+        name:
+          - nfs-utils
+          - nfs4-acl-tools
+        state: present
+      when: ansible_os_family == 'RedHat'
+
+    - name: Ensure required utilities present for Debian-based
+      ansible.builtin.apt:
+        name:
+          - nfs-common
+          - nfs4-acl-tools
+        state: present
+      when: ansible_os_family == 'Debian'
+
+    - name: Ensure mountpoint exist
+      ansible.builtin.file:
+        path: "{{ nfs_mountpoint }}"
+        state: directory
+        mode: "{{ nfs_permissions }}"
+        owner: "{{ owner }}"
+        group: "{{ group }}"
+
+    - name: Mount NFS network share
+      ansible.posix.mount:
+        src: "{{ nfs_share }}"
+        path: "{{ nfs_mountpoint }}"
+        fstype: nfs
+        opts: "{{ nfs_options }}"
+        state: mounted
