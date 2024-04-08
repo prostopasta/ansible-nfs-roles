@@ -1,6 +1,6 @@
 ---
 - name: Simple NFS posix.mount
-  hosts: localhost
+  hosts: all
   become: true
   gather_facts: yes
 

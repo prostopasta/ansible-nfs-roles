@@ -15,9 +15,10 @@ done
 
 # CREATE THE INVENTORY FILE
 
-PROJECT_DIRECTORY="/home/vagrant/ansible/"
+GITHUB_REPO="https://github.com/prostopasta/ansible-nfs-roles.git"
+PROJECT_DIRECTORY="/home/vagrant/ansible-nfs-roles"
 
-mkdir -p $PROJECT_DIRECTORY || true
+git clone $GITHUB_REPO
 cd $PROJECT_DIRECTORY || false
 
 # Creating the inventory file for all 3 nodes to run some adhoc command.
