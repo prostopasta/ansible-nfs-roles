@@ -1,0 +1,9 @@
+- hosts: localhost
+  become: true
+  gather_facts: yes
+
+  vars:
+    nfs_exports: [ "/mnt/public *(rw,insecure,nohide,all_squash,anonuid=33,no_subtree_check)" ]
+
+  roles:
+  - role: ansible-nfs-server
